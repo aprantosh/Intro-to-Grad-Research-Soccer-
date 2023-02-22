@@ -13,7 +13,7 @@ test <- soccer_collection
 a <- scale(select(test, -Gender,-Squad))
 
 abc <-data.frame(a)
-View(abc)
+#View(abc)
 Set_after_scaling <- data.frame(test$Gender, test$Squad,a)
 
 View(Set_after_scaling)
@@ -21,8 +21,11 @@ View(Set_after_scaling)
 install.packages("NbClust")
 library("NbClust")
 
-res <- NbClust(abc, diss = NULL, distance = 'euclidean', min.nc = 2, max.nc = 8, 
-               method = 'complete', index = 'silhouette')
+
+res <- NbClust(abc, diss = NULL, distance = 'euclidean', min.nc = 2, max.nc = 20, 
+               method = 'kmeans', index = 'silhouette')
 res
 
+res1 <- NbClust(data=abc, diss=NULL , distance = "euclidean", min.nc=2, max.nc = 15,method ='complete', 
+                index= "all", alphaBeale = 0.1)
 
