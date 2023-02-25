@@ -11,26 +11,47 @@ View(Top5_league)
 
 data.s <- scale(Top5_league[,-1:-2])
 data.s
-d <- dist(data.s)
-options(max.print = 1000000000)
-d
-tab <- data.frame(data.s)
-tab
-###################### K means ################
-k2 <- kmeans(data.s,2)
-k2
-k2$cluster
+data.d <- dist(data.s)
+data.d
 #################factoextra#################
 
 install.packages('factoextra')
 library(ggplot2)
 library(factoextra)
 
-fviz_nbclust(data.s,kmeans, method = "wss")
+fviz_nbclust(data.s,kmeans, method = "wss") + labs(subtitle = "Elbow Method")
 fviz_nbclust(data.s,kmeans, method = "silhouette")
 fviz_nbclust(data.s,kmeans, method = "gap_stat")
 
+####We will be using 4 clusters as seen in the Elbow Method##############
 
+
+####kmeans#####
+km.out <- kmeans(data.s, centers = 4, nstart = 100)
+print(km.out)
+
+
+####Visualizing the clustering algorithm results based on Squad
+km.clusters <- km.out$cluster
+rownames(data.s) <- Top5_league$Squad
+rownames(data.s) <- paste(Top5_league$Squad, 1: dim(Top5_league)[1],sep = "_")
+fviz_cluster(list(data = data.s, cluster= km.clusters))
+##From the graph I think the blue color seems to be best club of all 5 top league as in the blue cluster 
+## The clubs are seems like top from their league.
+
+
+
+####Visualizing the clustering algorithm results based on Leauge
+km.out <- kmeans(data.s, centers = 4, nstart = 100)
+print(km.out)
+
+km.clusters <- km.out$cluster
+rownames(data.s) <- Top5_league$League
+rownames(data.s) <- paste(Top5_league$League, 1: dim(Top5_league)[1],sep = "_")
+fviz_cluster(list(data = data.s, cluster= km.clusters))
+
+##From the graph I think the blue color seems to be best club of all 5 top league as in the blue cluster 
+## The clubs are seems like top from their league.
 
 
 #############NbClust Package###################
@@ -38,69 +59,27 @@ fviz_nbclust(data.s,kmeans, method = "gap_stat")
 library(NbClust)
 temp1 <- NbClust(data = tab, diss = NULL, distance = "euclidean", min.nc = 2, max.nc = 10, 
         
-        method = "kmeans", index = "all", alphaBeale = 0.1)
+        method = "kmeans", index = "gamma", alphaBeale = 0.1)
 temp1
-table (temp$Best.partition)
+####(we got 10 clusters using index = gamma)
 
-table(Top5_league$Squad)
-table(Top5_league$League)
-table()
+temp1 <- NbClust(data = tab, diss = NULL, distance = "euclidean", min.nc = 2, max.nc = 10, 
+                 
+                 method = "kmeans", index = "ball", alphaBeale = 0.1)
+temp1
 
+###we gor 3 clusters usning index  = ball
 
+temp1 <- NbClust(data = tab, diss = NULL, distance = "euclidean", min.nc = 2, max.nc = 10, 
+                 
+                 method = "kmeans", index = "hubert", alphaBeale = 0.1)
+temp1
+### we got 4 clusters using index = hubert
+
+###We are getting different nummber of clusters from different algorithm. I assume 4 cluster seems good.
+##when I tried 5 cluster 
 
 ############################################
 
-library(tidyverse)
 
-test1 <- Top5_league
-a <- scale(select(test1, -Squad, -League))
-
-abc <-data.frame(a)
-View(abc)
-Set_after_scaling <- data.frame(test$Gender, test$Squad,a)
-
-View(Set_after_scaling)
-
-install.packages("NbClust")
-library("NbClust")
-
-
-res <- NbClust(abc, diss = NULL, distance = 'euclidean', min.nc = 2, max.nc = 20, 
-               method = 'kmeans', index = 'all')
-res
-table (res$Best.partition)
-
-table(soccer_collection$Gender)
-
-
-
-###################
-library(gmodels)
-library(NbClust)
-library(tidyverse)
-library(readxl)
-library(knitr)
-
-# Find best number of clusterw
-set.seed(1990)
-# list of potential indices (note: I removed some which took longer to run)
-indices <- c("kl", "ch", "hartigan", "ccc", "scott", "marriot", "trcovw", "tracew", "friedman", "rubin", "cindex", "db", "silhouette", "duda", "pseudot2", "beale", "ratkowsky", "ball", "ptbiserial", "gap", "frey", "mcclain", "dunn", "sdindex", "sdbw")
-# initialize var to collect clustering results
-results <- list()
-# loop over indices with try function (which continues running even with errors)
-for (i in 1:length(indices)) {
-  print(paste0("Trying ", indices[i], " index..."))
-  results[[i]] <- try(NbClust(data=abc,min.nc=2,max.nc=15, index=indices[i], method="kmeans")) 
-}
-num_clust <- list()
-for (i in 1:length(results)){
-  num_clust[[i]] <- try(as.numeric(results[[i]]$Best.nc[1]))
-}
-
-getmode <- function(v) {
-  uniqv <- unique(v)
-  uniqv[which.max(tabulate(match(v, uniqv)))]
-}
-
-paste0("Based on a number of criteria, we will select ", getmode(num_clust), " clusters.")
 
