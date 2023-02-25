@@ -21,11 +21,18 @@ View(Set_after_scaling)
 install.packages("NbClust")
 library("NbClust")
 
+fviz_nbclust(abc,kmeans, method = "gap_stat")
 
 res <- NbClust(abc, diss = NULL, distance = 'euclidean', min.nc = 2, max.nc = 20, 
-               method = 'kmeans', index = 'silhouette')
+               method = 'kmeans', index = 'mcclain')
 res
 
 res1 <- NbClust(data=abc, diss=NULL , distance = "euclidean", min.nc=2, max.nc = 15,method ='complete', 
                 index= "all", alphaBeale = 0.1)
+table (res$Best.partition)
+
+table(soccer_collection$Gender)
+
+
+
 
