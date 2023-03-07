@@ -93,50 +93,56 @@ fviz_nbclust(game.s,kmeans, method = "wss") + labs(subtitle = "Elbow Method")
 
 
 
-
-####kmeans clustering##### 
+################****************************################
+##############kmeans clustering##### 
 
 ##Selecting k =3 
-km.out <- kmeans(game.s, centers = 3, nstart = 100)
-print(km.out)
+km.out1 <- kmeans(game.s, centers = 3, nstart = 100)
+print(km.out1)
 
 
 ####Visualizing the clustering algorithm results based on CLub
-km.clusters <- km.out$cluster
+km1.clusters <- km.out1$cluster
+km1.clusters
 rownames(game.s) <- soccer_collection$Club
 rownames(game.s) <- paste(soccer_collection$Club, 1: dim(soccer_collection)[1],sep = "_")
-fviz_cluster(list(data = game.s, cluster= km.clusters))
+fviz_cluster(list(data = game.s, cluster= km1.clusters))
+
+
 
 
 
 ####Visualizing the clustering algorithm results based on League
-km.clusters <- km.out$cluster
+km1.clusters <- km.out1$cluster
+km1.clusters
 rownames(game.s) <- soccer_collection$League
 rownames(game.s) <- paste(soccer_collection$League, 1: dim(soccer_collection)[1],sep = "_")
-fviz_cluster(list(data = game.s, cluster= km.clusters))
+fviz_cluster(list(data = game.s, cluster= km1.clusters))
 
-
+############################################
+#########***********************############
 ####K means Clustering
 
 ##Selecting k =4
 ####k means#####
-km.out <- kmeans(game.s, centers = 4, nstart = 100)
-print(km.out)
+
+km.out2 <- kmeans(game.s, centers = 4, nstart = 100)
+print(km.out2)
 
 
 ####Visualizing the clustering algorithm results based on CLub
-km.clusters <- km.out$cluster
+km2.clusters <- km.out2$cluster
 rownames(game.s) <- soccer_collection$Club
 rownames(game.s) <- paste(soccer_collection$Club, 1: dim(soccer_collection)[1],sep = "_")
-fviz_cluster(list(data = game.s, cluster= km.clusters))
+fviz_cluster(list(data = game.s, cluster= km2.clusters))
 
 
 
 ####Visualizing the clustering algorithm results based on League
-km.clusters <- km.out$cluster
+km2.clusters <- km.out2$cluster
 rownames(game.s) <- soccer_collection$League
 rownames(game.s) <- paste(soccer_collection$League, 1: dim(soccer_collection)[1],sep = "_")
-fviz_cluster(list(data = game.s, cluster= km.clusters))
+fviz_cluster(list(data = game.s, cluster= km2.clusters))
 
 
 
@@ -145,4 +151,18 @@ fviz_cluster(list(data = game.s, cluster= km.clusters))
 
 ##From the graph I think the blue color seems to be best club of all 5 top league as in the blue cluster 
 ## The clubs are seems like top from their league.
+
+###%%%% for k =3 %%%%%######
+km.out1$size
+table(soccer_collection$League, km.out1$cluster)
+table(soccer_collection$Club, km.out1$cluster)
+
+#####%%%%% for k =4 %%%%%%%#####
+km.out2$size
+table(soccer_collection$League, km.out2$cluster)
+table(soccer_collection$Club, km.out2$cluster)
+
+plot(soccer_collection[c("Gls", "Sh")], col = km.out1$cluster)
+
+plot(soccer_collection[c("Gls", "Sh")], col = soccer$League)
 
