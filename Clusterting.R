@@ -164,5 +164,5 @@ table(soccer_collection$Club, km.out2$cluster)
 
 plot(soccer_collection[c("Gls", "Sh")], col = km.out1$cluster)
 
-plot(soccer_collection[c("Gls", "Sh")], col = soccer$League)
+plot(soccer_collection[c("Gls", "Sh")], col = soccer_collection$League)
 
