@@ -14,15 +14,30 @@ soccer_collection = read_excel("C://Users/prantosh/Documents/Intro_to_Grad_Resea
 View(soccer_collection)
 test <- soccer_collection
 
+str(soccer_collection)
+summary(soccer_collection)
+
 ##Scaling for the quantitative datas##
 #scale(select(soccer_collection, -Gender, -Squad))
 game.s <- scale(select(test, -Club,-League))
 View(game.s)
-
+game.s <- data.frame(game.s)
 game.d <- dist(game.s)
 
 Set_after_scaling <- data.frame(test$Club, test$League,game.s)
 #View(Set_after_scaling)
+
+#########Using of the fviz_nbclust to find out the best number of cluster
+install.packages('factoextra')
+library(ggplot2)
+library(factoextra)
+
+fviz_nbclust(game.s,kmeans, method = "wss") + labs(subtitle = "Elbow Method")
+fviz_nbclust(game.s,kmeans, method = "silhouette")
+fviz_nbclust(game.s,kmeans, method = "gap_stat")
+
+NbClust(data = game.s, diss = NULL, distance = "euclidean",
+        min.nc = 2, max.nc = 993, method = "kmeans")
 
 ######### Using of NbClust package to find the best number of clusters#######
 
@@ -165,4 +180,34 @@ table(soccer_collection$Club, km.out2$cluster)
 plot(soccer_collection[c("Gls", "Sh")], col = km.out1$cluster)
 
 plot(soccer_collection[c("Gls", "Sh")], col = soccer_collection$League)
+
+
+
+
+
+
+##@@@@@@@@@@@@ Finding number of clusters in unique way @@@@@@@@@@@@@@@@@@@@@#
+
+lista.methods = c("kl", "ch", "hartigan","mcclain", "gamma", "gplus",
+                  "tau", "dunn", "sdindex", "sdbw", "cindex", "silhouette",
+                  "ball","ptbiserial", "gap","frey")
+lista.distance = c("metodo","euclidean", "maximum", "manhattan", "canberra")
+
+tabla = as.data.frame(matrix(ncol = length(lista.distance), nrow = length(lista.methods)))
+names(tabla) = lista.distance
+
+for (j in 2:length(lista.distance)){
+  for(i in 1:length(lista.methods)){
+    
+    nb = NbClust(game.s, distance = lista.distance[j],
+                 min.nc = 2, max.nc = 8, 
+                 method = "kmeans", index =lista.methods[i])
+    tabla[i,j] = nb$Best.nc[1]
+    tabla[i,1] = lista.methods[i]
+    
+  }}
+
+tabla
+View(tabla)
+
 
