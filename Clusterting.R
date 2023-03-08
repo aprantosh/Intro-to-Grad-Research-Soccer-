@@ -200,7 +200,7 @@ for (j in 2:length(lista.distance)){
   for(i in 1:length(lista.methods)){
     
     nb = NbClust(game.s, distance = lista.distance[j],
-                 min.nc = 2, max.nc = 8, 
+                 min.nc = 3, max.nc = 7, 
                  method = "kmeans", index =lista.methods[i])
     tabla[i,j] = nb$Best.nc[1]
     tabla[i,1] = lista.methods[i]
@@ -208,6 +208,8 @@ for (j in 2:length(lista.distance)){
   }}
 
 tabla
-View(tabla)
+tabla <- tabla
 
+plot(tabla[c("euclidean")])
+barplot(tabla$euclidean)
 
