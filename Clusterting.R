@@ -1,8 +1,13 @@
 setwd("C://Users/prantosh/Documents/Intro_to_Grad_Research/Intro_to_Graduate_Research")
+install.packages('factoextra')
 library("readxl")
 library(tidyverse)
-
-library("readxl")
+library(tidyr)
+library(gridExtra)
+library(ggplot2)
+library(purrr)
+library(factoextra)
+library(FactoMineR)
 
 ####
 ## This is the new dataset combination of Top 5 league with MLS ##
@@ -11,8 +16,36 @@ library("readxl")
 
 # Read xlsx files
 soccer_collection = read_excel("C://Users/prantosh/Documents/Intro_to_Grad_Research/Intro_to_Graduate_Research/all_datasets.xlsx")
-View(soccer_collection)
+#View(soccer_collection)
 test <- soccer_collection
+
+summary(test)
+
+
+
+#######Graph and plot visualization of the dataset#################
+
+test[1:3]
+str(test)
+names(test)
+
+
+ggplot(test, aes(League,  pass_completed))+ 
+  geom_point(size = 3)+
+  geom_line(colour = "red")
+
+
+ggplot(test, aes(League,  pass_completed))+ 
+  geom_point(size = 3 , alpha =0.5)+
+  geom_smooth(method= lm,se =F) +
+  #facet_wrap(~League)+
+  labs(title= "Completed Pass among different Countries Club")+
+  theme_bw()
+
+ ####################################################################
+
+glimpse(test)
+test$TotDist
 
 str(soccer_collection)
 summary(soccer_collection)
@@ -20,7 +53,7 @@ summary(soccer_collection)
 ##Scaling for the quantitative datas##
 #scale(select(soccer_collection, -Gender, -Squad))
 game.s <- scale(select(test, -Club,-League))
-View(game.s)
+#View(game.s)
 game.s <- data.frame(game.s)
 game.d <- dist(game.s)
 
@@ -28,83 +61,6 @@ Set_after_scaling <- data.frame(test$Club, test$League,game.s)
 #View(Set_after_scaling)
 
 #########Using of the fviz_nbclust to find out the best number of cluster
-install.packages('factoextra')
-library(ggplot2)
-library(factoextra)
-
-fviz_nbclust(game.s,kmeans, method = "wss") + labs(subtitle = "Elbow Method")
-fviz_nbclust(game.s,kmeans, method = "silhouette")
-fviz_nbclust(game.s,kmeans, method = "gap_stat")
-
-NbClust(data = game.s, diss = NULL, distance = "euclidean",
-        min.nc = 2, max.nc = 993, method = "kmeans")
-
-######### Using of NbClust package to find the best number of clusters#######
-
-install.packages("NbClust")
-library("NbClust")
-
-##Using index == "ball" , we get 3 clusters.####
-
-res <- NbClust(game.s, diss = NULL, distance = 'euclidean', min.nc = 2, max.nc = 20, 
-               method = 'kmeans', index = 'ball', alphaBeale = 0.1)
-res
-
-
-##Using index == "frey" , we get 2 clusters.####
-
-res1 <- NbClust(data=game.s, diss=NULL , distance = "euclidean", min.nc=2, max.nc = 20,method ="kmeans", 
-                index= "frey", alphaBeale = 0.1)
-res1
-
-##Using index == "gamma" , we get 20 clusters.####
-
-res2 <- NbClust(data=game.s, diss=NULL , distance = "euclidean", min.nc=2, max.nc = 20,method ="kmeans", 
-                index= "gamma", alphaBeale = 0.1)
-res2
-
-##Using index == "dunn" , we get 11 clusters.####
-
-res3 <- NbClust(data=game.s, diss=NULL , distance = "euclidean", min.nc=2, max.nc = 15,method ="kmeans", 
-                index= "dunn", alphaBeale = 0.1)
-res3
-
-##Using index == "kl" , we get 6 clusters.####
-
-res4 <- NbClust(data=game.s, diss=NULL , distance = "euclidean", min.nc=2, max.nc = 15,method ="kmeans", 
-                index= "kl", alphaBeale = 0.1)
-res4
-
-##Using index == "ratkowsky" , we get 3 clusters.####
-
-res5 <- NbClust(data=game.s, diss=NULL , distance = "euclidean", min.nc=2, max.nc = 15,method ="kmeans", 
-                index= "ratkowsky", alphaBeale = 0.1)
-res5
-
-##Using index == "cindex" , we get 3 clusters.####
-
-res6 <- NbClust(data=game.s, diss=NULL , distance = "euclidean", min.nc=2, max.nc = 15,method ="kmeans", 
-                index= "cindex", alphaBeale = 0.1)
-res6
-
-
-##Using index == "hubert" , we get 5 clusters.####
-
-res6 <- NbClust(data=game.s, diss=NULL , distance = "euclidean", min.nc=2, max.nc = 15,method ="kmeans", 
-                index= "hubert", alphaBeale = 0.1)
-res6
-
-
-
-
-##########################################
-
-install.packages('factoextra')
-library(ggplot2)
-library(factoextra)
-
-fviz_nbclust(game.s,kmeans, method = "wss") + labs(subtitle = "Elbow Method")
-
 
 
 
@@ -115,8 +71,15 @@ fviz_nbclust(game.s,kmeans, method = "wss") + labs(subtitle = "Elbow Method")
 km.out1 <- kmeans(game.s, centers = 3, nstart = 100)
 print(km.out1)
 
+o=order(km.out1$cluster)
+loopp <-data.frame(test$League[o],km.out1$cluster[o])
 
-####Visualizing the clustering algorithm results based on CLub
+loopp
+
+table(data.frame(test$League[o],km.out1$cluster[o]))
+
+
+ ####Visualizing the clustering algorithm results based on CLub
 km1.clusters <- km.out1$cluster
 km1.clusters
 rownames(game.s) <- soccer_collection$Club
@@ -136,33 +99,6 @@ fviz_cluster(list(data = game.s, cluster= km1.clusters))
 
 ############################################
 #########***********************############
-####K means Clustering
-
-##Selecting k =4
-####k means#####
-
-km.out2 <- kmeans(game.s, centers = 4, nstart = 100)
-print(km.out2)
-
-
-####Visualizing the clustering algorithm results based on CLub
-km2.clusters <- km.out2$cluster
-rownames(game.s) <- soccer_collection$Club
-rownames(game.s) <- paste(soccer_collection$Club, 1: dim(soccer_collection)[1],sep = "_")
-fviz_cluster(list(data = game.s, cluster= km2.clusters))
-
-
-
-####Visualizing the clustering algorithm results based on League
-km2.clusters <- km.out2$cluster
-rownames(game.s) <- soccer_collection$League
-rownames(game.s) <- paste(soccer_collection$League, 1: dim(soccer_collection)[1],sep = "_")
-fviz_cluster(list(data = game.s, cluster= km2.clusters))
-
-
-
-####Using k == 4 seems diverse in the data as we can see more clearly how the cluster plot scatters###
-
 
 ##From the graph I think the blue color seems to be best club of all 5 top league as in the blue cluster 
 ## The clubs are seems like top from their league.
@@ -172,44 +108,135 @@ km.out1$size
 table(soccer_collection$League, km.out1$cluster)
 table(soccer_collection$Club, km.out1$cluster)
 
-#####%%%%% for k =4 %%%%%%%#####
-km.out2$size
-table(soccer_collection$League, km.out2$cluster)
-table(soccer_collection$Club, km.out2$cluster)
 
-plot(soccer_collection[c("Gls", "Sh")], col = km.out1$cluster)
-
-plot(soccer_collection[c("Gls", "Sh")], col = soccer_collection$League)
+###################################new try##################
 
 
 
 
+ggplot(data = mnop, aes(x =test.League.o. ,y= Freq,fill = km.out1.cluster.o.  ))+geom_bar(stat = "identity") + 
+  labs(x = "\n Country", y = "Total Numbers in Respective Cluster \n", 
+       title = "Visualization of partition of League in respective to Cluster\n",
+       fill = "km.out1.cluster.o.") +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.title.x = element_text(face="bold", colour="blue", size = 12),
+        axis.title.y = element_text(face="bold", colour="blue", size = 12),
+        legend.position = "bottom")
 
 
-##@@@@@@@@@@@@ Finding number of clusters in unique way @@@@@@@@@@@@@@@@@@@@@#
+#############################
+##Selecting k =3 
+km.out1 <- kmeans(game.s, centers = 3, nstart = 100)
+print(km.out1)
 
-lista.methods = c("kl", "ch", "hartigan","mcclain", "gamma", "gplus",
-                  "tau", "dunn", "sdindex", "sdbw", "cindex", "silhouette",
-                  "ball","ptbiserial", "gap","frey")
-lista.distance = c("metodo","euclidean", "maximum", "manhattan", "canberra")
+o=order(km.out1$cluster)
+o
+loopp <-data.frame(test$League[o],km.out1$cluster[o])
 
-tabla = as.data.frame(matrix(ncol = length(lista.distance), nrow = length(lista.methods)))
-names(tabla) = lista.distance
+loopp
 
-for (j in 2:length(lista.distance)){
-  for(i in 1:length(lista.methods)){
-    
-    nb = NbClust(game.s, distance = lista.distance[j],
-                 min.nc = 3, max.nc = 7, 
-                 method = "kmeans", index =lista.methods[i])
-    tabla[i,j] = nb$Best.nc[1]
-    tabla[i,1] = lista.methods[i]
-    
-  }}
+lops <- data.frame(test$League, km.out1$cluster)
+lops
 
-tabla
-tabla <- tabla
 
-plot(tabla[c("euclidean")])
-barplot(tabla$euclidean)
+
+ggplot(test, aes(League,  pass_completed))+ 
+  geom_point(size = 3)+
+  geom_line(colour = "red")
+
+
+ggplot(test, aes(League,  pass_completed))+ 
+  geom_point(size = 3 , alpha =0.5)+
+  geom_smooth(method= lm,se =F) +
+  facet_wrap(~Club)+
+  labs(title= "Completed Pass among different Countries Club")+
+  theme_bw()
+
+
+ggplot(test, aes(League,  Interceptions))+ 
+  geom_point(size = 3 , alpha =0.5)+
+  geom_line(colour = "red")+
+  geom_smooth(method= lm,se =F) +
+  #facet_wrap(~League)+
+  labs(title= "Interceptions made  among different Countries Club")+
+  theme_bw()
+
+ggplot(test, aes(League,total_Shots))+ 
+  geom_point(size = 3 , alpha =0.5)+
+  geom_line(colour = "red")+
+  geom_smooth(method= lm,se =F) +
+  #facet_wrap(~League)+
+  labs(title= "Total shots made in a Game of different Countries Club")+
+  theme_bw()
+
+
+soccer_collection %>%
+  ggplot(aes(x = pass_completed)) +
+  #geom_boxplot() +
+  geom_point(stat = "count") +
+  geom_line(stat = "count") +
+  facet_wrap(vars(League)) +
+  theme_bw()  
+
+
+lops
+table(lops)
+all <- lops
+colnames(all)[1]  <- "League" 
+colnames(all)[2]  <- "Cluster" 
+lops
+all
+
+
+
+soccer_collection$Cluster <- all$Cluster
+
+#soccer_collection <- cbind.data.frame(soccer_collection,CLuster)
+soccer_collection$Cluster
+
+#all <- cbind.data.frame(soccer_collection, loopp$Cluster)
+
+a<- all$League 
+b <- soccer_collection$Errors
+Clusters<-all$Cluster
+new_tab <- cbind.data.frame(a,b,Clusters)
+new_tab
+
+new_tab %>%
+  ggplot(aes(x = soccer_collection$Club, y = b,fill =factor(Clusters),color= factor(Clusters), shape = factor(Clusters)
+)) +
+  geom_point(size = 3 , alpha =4)+
+  geom_smooth(method= lm,se =F) +
+  facet_wrap(vars(a)) +
+  
+  labs(title= "Mistakes made among different Countries Club")+
+  theme_bw()
+
+
+soccer_collection %>%
+  ggplot(aes(x = Club, y = total_Shots)) +
+  geom_point() +
+  facet_wrap(vars(League)) +
+  theme_bw()
+
+
+#color = hp, shape = factor(cyl)
+
+
+
+new_table <- cbind.data.frame(soccer_collection$League, soccer_collection$total_Shots, loopp$Cluster)
+new_table
+table(new_table)
+
+game.s
+km <- kmeans(game.s, centers = 3, nstart = 100)
+print(km)
+
+table(km$cluster)
+
+o=order(km.out1$cluster)
+loopp <-data.frame(test$League[o],km.out1$cluster[o])
+
+loopp
+
 
